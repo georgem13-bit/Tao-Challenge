@@ -1,0 +1,320 @@
+\documentclass[11pt]{article}
+\usepackage[margin=2.6cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+\newtheorem{remark}{Remark}
+
+\newcommand{\Q}{\mathbf{Q}}
+
+\title{A tenth-discriminant bound from Guo's zero gap:\\
+an explicit extraction via Kimura's Proposition~9}
+\author{George A. D. Morris \and Ozzie (AI research assistant, Muse, Meta)}
+\date{30 October 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+In response to Terence Tao's ``tenth discriminant'' challenge (20 October
+2026), which asks for explicit, optimised upper bounds on a hypothetical
+tenth class-number-one imaginary quadratic discriminant derived from the
+recent proofs excluding Landau--Siegel zeros, we extract such a bound from
+the zero-gap formulation of Kimura, using the explicit zero gap of Guo in
+place of Kimura's numerically certified grid constants. Guo's Theorem~1.1
+gives $(1-\beta)\log q > 1/100$ for every primitive quadratic Dirichlet
+character of conductor $q \ge 3$ and every real zero $\beta$; feeding the
+zero gap $(c,T) = (1/100, T)$ into Kimura's Proposition~9 and the class
+number formula, and certifying the resulting elementary inequality in
+interval arithmetic, we obtain
+\[
+h(-d) = 1 \ \Longrightarrow\ d \le 32{,}605{,}775,
+\]
+and, with the stronger constant $c = 1/64$ of Guo's Remark~1.2,
+$d \le 12{,}609{,}991$. These improve every previously posted extraction
+through Kimura's Proposition~9 (Rudolph: $d < 189{,}348{,}540$; Murphy's
+chains: $6.47\times 10^7$ and $1.23\times 10^8$) by a factor of roughly
+$2$--$15$. We are explicit that the bound is not competitive with the
+determinant-method bounds ($d \le 331$) or the quasi-Riemann-hypothesis
+bounds ($d \le 653$) posted in the same challenge; its interest is as the
+best bound obtainable from the zero-gap route, by an argument whose only
+non-elementary inputs are two cited, fully explicit theorems.
+\end{abstract}
+
+\section{Introduction}
+
+The nine Heegner discriminants $d = 1, 2, 3, 7, 11, 19, 43, 67, 163$ are
+exactly the positive integers for which $\Q(\sqrt{-d})$ has class number
+one (Heegner--Stark--Baker). If $d$ is a Heegner number and $\chi$ is the
+associated quadratic character, the class number formula gives
+$L(1,\chi) = \pi/\sqrt{d}$, and a short argument produces a Landau--Siegel
+zero $\beta$ of $L(s,\chi)$ with $1-\beta \asymp 1/\sqrt{d}$. Consequently,
+any sufficiently explicit theorem excluding real zeros of quadratic
+Dirichlet $L$-functions close to $s=1$ yields an explicit upper bound on a
+hypothetical tenth discriminant. Making this effective by Goldfeld's
+method gave $d \le e^{7000}$, improved by Oesterl\'e to $d \le e^{55}$.
+
+In October 2026, OpenAI's manuscript \cite{openai} asserting the uniform
+exclusion of Landau--Siegel zeros (and, in its family~003, a zero-free
+region $\Re s > 7/8$) was followed within two weeks by independent proofs
+due to Banks \cite{banks}, Kerr \cite{kerr}, Green \cite{green} and
+Kimura \cite{kimura}, among others. On 20 October 2026 Tao launched an
+open challenge \cite{tao}: for each such proof, or by a novel argument,
+\emph{use an AI tool to work out an effective upper bound for a
+hypothetical tenth discriminant, without using Heegner's methods, and make
+best efforts to optimise the constant}, with contributions posted in the
+comments of the challenge post, AI assistance disclosed, and attribution
+to prior contributions.
+
+The strongest bounds posted in the challenge to date come from the
+determinant method (Chung/rStation agents: $D \le 331$, 28 October 2026;
+Murphy: $q < 565$; twinheterodox: $q < 570$) and from evaluating the
+Chowla--Selberg formula at the fixed point $s = 7/8$ of the quasi-Riemann
+hypothesis (LemmaLab: $d \le 653$). A separate, simpler family of
+contributions extracts bounds from \emph{zero gaps} via Kimura's
+Proposition~9 \cite{kimura}: Rudolph \cite{tao} obtained
+$|D| < e^{19.0591} < 189{,}348{,}540$ using Kimura's grid constant
+$c = 0.004401$, and Murphy's survey records two further chains of this
+type giving $d < 6.47\times 10^7$ and $d < 1.23\times 10^8$.
+
+The present note improves the zero-gap family. Kimura's grid constants
+grow from $5.811\times 10^{-4}$ at small conductors to
+$5.965\times 10^{-3}$ for $\log q \ge 35.0131$. Guo \cite{guo} has since
+proved, by an elementary argument, the uniform bound
+$(1-\beta)\log q > 1/100$ for \emph{all} conductors $q \ge 3$ (and
+$1/64$ in his Remark~1.2), which is stronger than every constant in
+Kimura's table in the range relevant here. Substituting Guo's constant
+into Kimura's conversion and optimising the free parameters yields the
+bounds in the abstract. The derivation uses no finite conductor-range
+computation: unlike Banks's all-conductor corollary, which rests on the
+finite-range computation of Lu--Zaman--Zhao, Guo's theorem covers all
+$q \ge 3$ directly, and Kimura's Proposition~9 is proved in Lean in
+\cite{kimura}. The price of this cleanliness is tightness: the zero-gap
+to class-number conversion is lossy, and our bound does not approach the
+determinant-method leaders. Tao's challenge explicitly welcomes
+per-approach bounds of this kind.
+
+\section{The three inputs}
+
+Throughout, $d \ge 3$ denotes the absolute value of a fundamental
+discriminant $D_K < 0$ of an imaginary quadratic field $K$, $\chi$ is the
+primitive quadratic character of conductor $d$, and $h(-d)$ is the class
+number.
+
+\begin{proposition}[Guo \cite{guo}, Theorem 1.1 and Remark 1.2]
+\label{prop:guo}
+For every primitive quadratic Dirichlet character $\chi$ of conductor
+$q \ge 3$, every real zero $\beta \in (0,1)$ of $L(s,\chi)$ satisfies
+$(1-\beta)\log q > 1/100$. The same argument yields the constant $1/64$ in
+place of $1/100$ \textup{(}Remark 1.2, verified in Appendix A of
+\cite{guo}\textup{)}.
+\end{proposition}
+
+Kimura \cite{kimura} calls $(c,T)$ a \emph{zero gap} if
+$(1-\beta)\ell \ge c$ for every primitive real character of conductor
+$q \ge 3$ with $\ell = \log q \ge T$ and every real zero $\beta$.
+Proposition~\ref{prop:guo} says precisely that the zero gap $(c,T)$ holds
+with $c = 1/100$ (resp.\ $c = 1/64$) for \emph{every} $T$.
+
+\begin{proposition}[Kimura \cite{kimura}, Proposition 9]
+\label{prop:kimura}
+Let $c > 0$, $T \ge 2$, $c/T \le 1/2$, and suppose the zero gap $(c,T)$
+holds. Let $A > 0$ with $AT \ge e$, let $V \ge 1$ be an integer, and put
+$\sigma_T = 1 - c/T$, $P = c\bigl(1 + \log(2VAT)/T\bigr)$, and
+\[
+\varepsilon
+= e^{c}\Bigl(\frac{(AT)^{c/T} V^{c/T}}{cA}
++ \frac{4}{(AT)^{\sigma_T}}\Bigr)
++ \frac{e^{P}}{cA}
++ \frac{4e^{P}}{V^{\sigma_T}}
++ \frac{e^{P}}{AT}.
+\]
+If $\varepsilon < 1$, then every primitive real $\chi$ of conductor
+$q \ge 3$ with $\log q \ge T$ satisfies
+\[
+\sqrt{q}\, L(1,\chi) \;\ge\; (1-\varepsilon)\, c\, e^{-P}\, e^{T/2}/T.
+\]
+\end{proposition}
+
+\begin{proposition}[Class number formula; \cite{kimura}, eq.\ (4)]
+\label{prop:cnf}
+$2\pi h(-d) = w_K \sqrt{d}\, L(1,\chi)$, where $w_K \ge 2$ is the number of
+roots of unity in $K$. Hence $\pi h(-d) \ge \sqrt{d}\, L(1,\chi)$.
+\end{proposition}
+
+\section{Main result}
+
+\begin{theorem}
+\label{thm:main}
+If $h(-d) = 1$ then $d \le 32{,}605{,}775$.
+\end{theorem}
+
+\begin{corollary}
+\label{cor:variant}
+With $c = 1/64$ \textup{(}Proposition~\ref{prop:guo}, second
+statement\textup{)}, if $h(-d) = 1$ then $d \le 12{,}609{,}991$.
+\end{corollary}
+
+\begin{proof}[Proof of Theorem~\ref{thm:main}]
+Suppose $h(-d) = 1$ and $\log d \ge T := 17.3$. By
+Proposition~\ref{prop:guo} with $c = 1/100$, the zero gap $(c, T)$ holds.
+Apply Proposition~\ref{prop:kimura} with $A = 10^5$ and $V = 10^4$ (so
+$AT = 1.73\times 10^6 \ge e$ and $c/T \le 1/2$). Interval arithmetic
+(Section~\ref{sec:verify}) certifies
+$\varepsilon \le 0.00246309 < 1$ and
+\[
+\sqrt{d}\, L(1,\chi) \;\ge\; (1-\varepsilon)\, c\, e^{-P}\, e^{T/2}/T
+\;\ge\; 3.21436540 \;>\; \pi.
+\]
+But Proposition~\ref{prop:cnf} with $h(-d) = 1$ gives
+$\sqrt{d}\, L(1,\chi) \le \pi h(-d) = \pi$: a contradiction. Hence
+$\log d < 17.3$, i.e.\ $d < e^{17.3} = 32{,}605{,}775.72\ldots$, so
+$d \le 32{,}605{,}775$.
+\end{proof}
+
+\begin{proof}[Proof of Corollary~\ref{cor:variant}]
+Identical, with $c = 1/64$, $T = 16.35$, $A = 10^5$, $V = 10^4$:
+interval arithmetic certifies $\varepsilon \le 0.00175279$ and
+$(1-\varepsilon) c e^{-P} e^{T/2}/T \ge 3.25884426 > \pi$, whence
+$d < e^{16.35} = 12{,}609{,}991.07\ldots$
+\end{proof}
+
+\section{Computation and verification}
+\label{sec:verify}
+
+The only computation in the proof is the evaluation of the elementary
+expressions in Proposition~\ref{prop:kimura}. It is performed by a short
+Python script (\texttt{compute\_bound.py}, distributed with this note),
+in three parts.
+
+\paragraph{Validation of the machinery.}
+Before optimising, we validated our implementation of $\varepsilon$ and
+$P$ against Kimura's Theorem~10 \cite{kimura}, which uses
+$A = 10^6$, $V = 10^4$ and his grid constants. Our computed log-margins
+$\log\bigl((1-\varepsilon)c_N e^{-P} e^{T_N/2}/(T_N \pi)\bigr)$ are:
+
+\begin{center}
+\begin{tabular}{lccccc}
+\toprule
+$N$ & 100 & 200 & 500 & 1000 & 2000 \\
+\midrule
+margin & 0.01990 & 0.03129 & 0.00925 & 0.02373 & 0.07199 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Kimura states that these margins lie between $0.009$ ($N = 500$) and
+$0.072$ ($N = 2000$) and that $\varepsilon < 7.8\times 10^{-4}$; our
+implementation returns $\varepsilon \le 7.73\times 10^{-4}$ across the
+table, matching both. As a second, independent cross-check, running the
+same machinery with Kimura's grid constant $c = 0.004401$ returns the
+threshold $T = 19.060$, $e^T = 189{,}519{,}030$, agreeing with Rudolph's
+independently extracted $e^{19.0591} \approx 1.89\times 10^8$ \cite{tao}.
+
+\paragraph{Optimisation.}
+A grid search over $A \in [10^3, 10^8]$, $V \in [10^2, 10^6]$,
+$T \in [12, 22]$ finds float-arithmetic thresholds $T = 17.250$ for
+$c = 1/100$ (at $A = 10^5$, $V = 10^4$) and $T = 16.270$ for $c = 1/64$
+(at $A = 5.6\times 10^4$, $V = 10^4$). The certified values
+$T = 17.3$ and $T = 16.35$ are round choices just past the optima,
+trading negligible tightness for comfortable margins.
+
+\paragraph{Certified values.}
+The final inequalities were re-evaluated in rigorous interval
+arithmetic (mpmath \texttt{iv}, 50-digit working precision). For the
+headline parameters, $\sigma_T = 0.99942197$, $P = 0.02402724$, and the
+five terms of $\varepsilon$ are
+$1.0239\times 10^{-3}$, $2.3548\times 10^{-6}$, $1.0243\times 10^{-3}$,
+$4.1191\times 10^{-4}$, $5.9209\times 10^{-7}$, summing to
+$\varepsilon \le 0.00246309$; the certified lower bound is
+$(1-\varepsilon) c e^{-P} e^{T/2}/T \ge 3.21436540 > \pi = 3.14159265\ldots$,
+a margin of $+0.0728$. For the variant, $\sigma_T = 0.99904434$,
+$P = 0.03876208$, $\varepsilon \le 0.00175279$, and the certified lower
+bound is $3.25884426$, a margin of $+0.1173$. The margins are two orders
+of magnitude larger than any conceivable rounding artefact, and the
+certified digits are stable under precision changes.
+
+\section{Placement and limitations}
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Bound & Route & Source \\
+\midrule
+$D \le 331$ & determinant & Chung/rStation, 28 Oct 2026 \\
+$d \le 653$ & Chowla--Selberg at $7/8$ & LemmaLab \\
+$q < 565$ & determinant & Murphy \\
+$d < 1.89\times 10^8$ & Kimura Prop.~9, $c = 0.004401$ & Rudolph \\
+$d < 6.47\times 10^7$ & Kimura zero-gap chain 58 & Murphy (survey) \\
+$d < 1.23\times 10^8$ & Kimura zero-gap chain 59 & Murphy (survey) \\
+$d \le 32{,}605{,}775$ & Kimura Prop.~9, Guo $c = 1/100$ & this note \\
+$d \le 12{,}609{,}991$ & Kimura Prop.~9, Guo $c = 1/64$ & this note \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Three limitations deserve emphasis. First, this is a \emph{bound}, not a
+classification: we do not enumerate the range $d < e^{17.3}$ (Kimura's
+Theorem~2 machinery, or the sieves of Larsson, Rudolph and Murphy, address
+that separate step). Second, the argument depends on Guo's preprint
+\cite{guo}, which at the time of writing is an unrefereed v1 and, unlike
+Kimura's results, is not formally verified as far as we know. Guo's
+argument is elementary --- Dirichlet's hyperbola method and positivity of
+character sums, with rational-inequality numerics --- and is therefore
+independently re-checkable, but a reader who declines to rely on it can
+substitute Kimura's grid constants into the same computation and recover
+$d < e^{19.06} \approx 1.9\times 10^8$; the Corollary additionally relies
+on Guo's Appendix~A. Third, our certification is interval arithmetic, not
+a Lean kernel check; formalising the arithmetic step would be routine
+but has not been done.
+
+\section*{AI-assistance disclosure}
+
+This note was produced by an AI assistant (Ozzie; Muse, Meta),
+working under the direction of George, who commissioned the work in
+response to Tao's challenge \cite{tao}. The literature search, the
+parameter optimisation, the interval-arithmetic certification and the
+drafting were all performed by the AI system; all intermediate artefacts
+(the computation script, its outputs, and a step-by-step derivation) are
+distributed with the note so that every claim can be checked without
+trusting the AI. The inputs of Guo \cite{guo} and Kimura \cite{kimura},
+and the prior extractions of Rudolph and Murphy reported in \cite{tao},
+are used with attribution, as the challenge's norms require.
+
+\section*{Code availability}
+
+\texttt{compute\_bound.py}, its full output
+(\texttt{computation\_output.txt} / \texttt{.json}), a term-by-term
+breakdown (\texttt{breakdown.txt}) and a prose derivation
+(\texttt{DERIVATION.md}) accompany this note in the same folder.
+
+\begin{thebibliography}{9}
+\bibitem{tao} T.~Tao, \emph{An experimental AI-math challenge: using
+tenth discriminant bounds to explore arguments ruling out Siegel zeroes},
+What's New, 20 October 2026. (Challenge post; participant bounds cited
+above --- Rudolph, Murphy, twinheterodox, LemmaLab, Larsson, Chung and
+the rStation agents --- appear in its comments, 20--28 October 2026.)
+
+\bibitem{openai} OpenAI, \emph{Uniform exclusion of Landau--Siegel
+zeros}, 1 October 2026.
+
+\bibitem{banks} W.~D. Banks, \emph{On the OpenAI proof that
+Landau--Siegel zeros do not exist}, arXiv:2610.15483.
+
+\bibitem{kerr} B.~Kerr, \emph{A simpler proof that there are no
+Landau--Siegel zeros}, arXiv:2610.21099.
+
+\bibitem{green} B.~Green, \emph{On Landau--Siegel zeros},
+hexagon:2610.00311.
+
+\bibitem{kimura} I.~Kimura, \emph{Imaginary quadratic fields of class
+number at most 2000}, arXiv:2610.21511 (v2).
+
+\bibitem{guo} V.~Z. Guo, \emph{An explicit elementary proof of no
+Landau--Siegel zeros}, arXiv:2610.30476 (v1).
+\end{thebibliography}
+
+\end{document}

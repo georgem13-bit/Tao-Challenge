@@ -1,0 +1,45 @@
+==============================================================================
+PART A -- validation: reproduce Kimura Theorem 10 (A=1e6, V=1e4)
+==============================================================================
+N=  100  T= 28.6787  c=0.005506  eps=7.723e-04  P=0.01070  log-margin=+0.0199
+N=  200  T= 30.1458  c=0.005622  eps=7.647e-04  P=0.01068  log-margin=+0.0313
+N=  500  T= 32.0058  c=0.005759  eps=7.561e-04  P=0.01065  log-margin=+0.0092
+N= 1000  T= 33.4757  c=0.005861  eps=7.499e-04  P=0.01063  log-margin=+0.0237
+N= 2000  T= 35.0131  c=0.005965  eps=7.439e-04  P=0.01061  log-margin=+0.0720
+eps < 7.8e-4 for all rows: True
+min margin at N=500: True; max margin at N=2000: True
+margin range: [0.0092, 0.0720]   (Kimura states 0.009 .. 0.072)
+
+==============================================================================
+PART B -- our extraction: minimise e^T s.t. LHS > pi  (h(-d)=1 => d < e^T)
+==============================================================================
+
+Guo Theorem 1.1 constant: c = 0.01
+  best T = 17.250  (A = 1e+05, V = 1e+04)
+  eps = 2.4632e-03,  P = 0.02407,  LHS = 3.143966 > pi = 3.141593, log-margin = +0.0008
+  e^T = 31,015,573
+
+Guo Remark 1.2 / Appendix A constant: c = 0.015625
+  best T = 16.270  (A = 5.623e+04, V = 1e+04)
+  eps = 2.7893e-03,  P = 0.03832,  LHS = 3.144587 > pi = 3.141593, log-margin = +0.0010
+  e^T = 11,640,489
+
+Kimura grid constant near l=19 (comparison only): c = 0.004401
+  best T = 19.060  (A = 5.623e+05, V = 1e+04)
+  eps = 1.2221e-03,  P = 0.01043,  LHS = 3.141927 > pi = 3.141593, log-margin = +0.0001
+  e^T = 189,519,030
+
+==============================================================================
+PART C -- interval-arithmetic certification of clean parameter choices
+==============================================================================
+Headline (Guo Thm 1.1, c=1/100): c=0.01, T=17.3, A=100000.0, V=10000.0
+  eps in [2.463087e-03, 2.463087e-03]  -> eps < 1 certified: True
+  LHS in [3.21436540, 3.21436540],  pi < 3.14159265 -> LHS > pi certified: True
+  => h(-d) = 1 implies d < e^17.3 = 32,605,776; safe integer bound: d <= 32,605,776
+
+Variant (Guo Rem 1.2/App A, c=1/64): c=0.015625, T=16.35, A=100000.0, V=10000.0
+  eps in [1.752789e-03, 1.752789e-03]  -> eps < 1 certified: True
+  LHS in [3.25884426, 3.25884426],  pi < 3.14159265 -> LHS > pi certified: True
+  => h(-d) = 1 implies d < e^16.35 = 12,609,991; safe integer bound: d <= 12,609,992
+
+Wrote computation_output.json
